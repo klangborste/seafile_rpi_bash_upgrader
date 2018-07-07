@@ -3,7 +3,8 @@
 ############################################################################
 #### description: semi automatic seafile rpi server version updater
 #### ~build from reference: https://manual.seafile.com/deploy/upgrade.html
-#### written by Max Roessler - mailmax@web.de on 10.12.2017
+#### written by Max Roessler - mailmax@web.de on 07.07.2018
+#### Version: 0.9
 ############################################################################
 
 ######## variable setup ########
@@ -15,12 +16,12 @@ red=$'\e[1;31m'
 end=$'\e[0m'
 
 ### the script is written in such a manner that it's important to write a trailing slashs on the variable dir names
-domain="sea.zapto.org"
-sea_user="seafile"
-sea_grp="seafile"
-tmp_dir="/tmp/seafile/"
-sea_dir="/mnt/datengrab/seafile/"
-sea_upgrade_dir="${sea_dir}seafile-server-latest/upgrade/"
+https=true #set to true for https usage on your seafile system
+domain=""
+sea_user=""
+sea_grp=""
+tmp_dir=""
+sea_dir=""
 #log_path="/var/log/"
 #log_file="seafile_updater_$(/bin/date -I)"
 ################################
@@ -35,15 +36,21 @@ sea_upgrade_dir="${sea_dir}seafile-server-latest/upgrade/"
 #}
 ###
 
+if [ "${https}" = 'true' ]; then
+	ssl_switch=https
+else
+	ssl_switch=http
+fi
+
 ### get the latest release installed on the server ###
-serv_ver=$(/usr/bin/curl -s "https://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
+serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
 if [ -z "${serv_ver}" ]; then
         echo "${red}error on validate server version!${end}"
         exit 1
 fi
 
 ### get the latest release available on GitHub ###
-git_ver=$(/usr/bin/curl -s https://api.github.com/repos/haiwen/seafile-rpi/releases/latest | /usr/bin/awk '/tag_name/{print substr($0, 17, length($0)-18)}')
+git_ver=$(/usr/bin/curl -s "https://api.github.com/repos/haiwen/seafile-rpi/releases/latest" | /usr/bin/awk '/tag_name/{print substr($0, 17, length($0)-18)}')
 if [ -z "${git_ver}" ]; then
         echo "${red}error on validate available git version!${end}"
         exit 1
@@ -89,7 +96,7 @@ else
                 exit 1
         fi
         ### if seafile directory not already exists
-        if [ -d "${sea_dir}seafile-server-${git_ver}/" ]; then
+        if [ ! -d "${sea_dir}seafile-server-${git_ver}/" ]; then
                 ### untar the archive
                 /bin/tar xzf "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" -C "${tmp_dir}" || { /bin/echo "${red}untar server package failed${end}"; exit 1; }
                 ### move file to seafile working directory
@@ -105,7 +112,7 @@ else
         ### compare versions if there is a major or minor version upgrade needed
         if [ "${git_major}" -gt "${serv_major}" ] || [ "${git_minor}" -gt "${serv_minor}" ] ; then
                 ### execute all needed incremental update scripts
-                for path in $(/bin/ls "${sea_upgrade_dir}"upgrade_*.sh); do
+                for path in $(/bin/ls "${sea_dir}seafile-server-${git_ver}"/upgrade/upgrade_*.sh); do
                         script=$(basename "$path")
                         old_ifs="${IFS}"
                         IFS='._'
@@ -115,7 +122,7 @@ else
                         IFS="${old_ifs}"
                         ### search for necessary update scripts
                         if [ "${script_major}" -gt "${serv_major}" ] || [ "${script_major}" -eq "${serv_major}" ] && [ "${script_minor}" -ge "${serv_minor}" ]; then
-	                	/bin/su - "${sea_user}" -s /bin/bash -c "cd /tmp/seafile/seafile-server-6.2.1/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
+	                	/bin/su - "${sea_user}" -s /bin/bash -c "cd ${sea_dir}seafile-server-${git_ver}/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
                         fi
                 done
         ### compare versions if there is a maint version upgrade needed
@@ -127,8 +134,8 @@ else
         /bin/systemctl start seafile.service seahub.service || { /bin/echo "${red}start the seafile and/or seahub service failed${end}"; exit 1; }
         ### verfiy if correct version of seafile server software is installed
         try=0
-        until [ $try -ge 3 ]; do
-                verify_ver=$(/usr/bin/curl -s --connect-timeout 15 "https://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
+        until [ $try -ge 5 ]; do
+                verify_ver=$(/usr/bin/curl -s --connect-timeout 30 "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
                 [ -n "${verify_ver}" ] && break
                 try=$((try+1))
                 sleep 10
