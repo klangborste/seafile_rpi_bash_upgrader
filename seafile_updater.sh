@@ -4,7 +4,7 @@
 #### description: semi automatic seafile rpi server version updater
 #### ~build from reference: https://manual.seafile.com/deploy/upgrade.html
 #### written by Max Roessler - mailmax@web.de on 07.07.2018
-#### Version: 0.9
+#### Version: 0.9.1
 ############################################################################
 
 ######## variable setup ########
@@ -15,15 +15,9 @@ grn=$'\e[1;32m'
 red=$'\e[1;31m'
 end=$'\e[0m'
 
-### the script is written in such a manner that it's important to write a trailing slashs on the variable dir names
-https=true #set to true for https usage on your seafile system
-domain=""
-sea_user=""
-sea_grp=""
-tmp_dir=""
-sea_dir=""
-#log_path="/var/log/"
-#log_file="seafile_updater_$(/bin/date -I)"
+### include configuration file with user assigned variables ###
+. seafile_updater.conf || { echo "-- Configuration file 'seafile_updater.conf' not found. See file 'seafile_updater.conf.template'"; exit 1; }
+
 ################################
 
 ### Before starting the script it must be checked manually if other necessary dependencies like new packages are needed to be installed, like on some releases already before. Please look at release notes: https://github.com/haiwen/seafile-rpi/releases/latest
