@@ -1,0 +1,34 @@
+######## template configuration file for seafile_updater.sh ########
+#
+### copy this file to a file named 'seafile_updater.conf' in scripts directory and set
+### variables in 'seafile_updater.conf' according to the setup of your seafile server
+#
+### the script is written in such a manner that it's important to write a trailing slashs on the variable dir names
+#
+#####################################################################
+
+
+# set to true for https usage on your seafile system:
+https=true
+
+
+# the URL of your seafile server (without trailing slash):
+domain=""
+
+
+# user and group of your seafile server:
+sea_user=""
+sea_grp=""
+
+
+# directory to store temporary files (with trailing slash):
+tmp_dir=""
+
+
+# directory of your seafile server (with trailing slash):
+sea_dir=""
+
+
+# logging options. Not yet implemented!
+#log_path="/var/log/"
+#log_file="seafile_updater_$(/bin/date -I)"
