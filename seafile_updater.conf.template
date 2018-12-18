@@ -12,7 +12,7 @@
 https=true
 
 
-# the URL of your seafile server (without trailing slash):
+# the domain of your seafile server (without trailing slash):
 domain=""
 
 
