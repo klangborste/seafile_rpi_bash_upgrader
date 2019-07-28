@@ -143,7 +143,7 @@ else
                 ### move old seafile version to installed dir as an archive for a possible rollback scenario
 		/bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
                 ### delete old temporary files and archives
-                /bin/rm -rf "${tmp_dir}"* || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
+                /bin/rm -rf "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
         else
                 echo "${red}a bigger problem is occured, no new version was installed!${end}"
         fi
