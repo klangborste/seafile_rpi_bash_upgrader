@@ -37,7 +37,7 @@ else
 fi
 
 ### get the latest release installed on the server ###
-serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
+serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-78)}')
 if [ -z "${serv_ver}" ]; then
         echo "${red}error on validate server version!${end}"
         exit 1
@@ -129,7 +129,7 @@ else
         ### verfiy if correct version of seafile server software is installed
         try=0
         until [ $try -ge 5 ]; do
-                verify_ver=$(/usr/bin/curl -s --connect-timeout 30 "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-46)}')
+                verify_ver=$(/usr/bin/curl -s --connect-timeout 30 "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-78)}')
                 [ -n "${verify_ver}" ] && break
                 try=$((try+1))
                 sleep 10
