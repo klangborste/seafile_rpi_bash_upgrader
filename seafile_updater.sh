@@ -4,7 +4,7 @@
 #### description: semi automatic seafile rpi server version updater
 #### ~build from reference: https://manual.seafile.com/deploy/upgrade.html
 #### written by Max Roessler - mailmax@web.de on 07.07.2018
-#### Version: 0.9.1
+#### Version: 0.9.3
 ############################################################################
 
 ######## variable setup ########
