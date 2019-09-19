@@ -105,7 +105,7 @@ else
                 exit 1
         fi
         ### setting right folder and file permissions on new folder structure
-	      /bin/chown -R "${sea_user}":"${sea_grp}" "${sea_dir}seafile-server-${git_ver}"/ || { /bin/echo "${red}chown the new server sea_dir failed${end}"; exit 1; }
+	/bin/chown -R "${sea_user}":"${sea_grp}" "${sea_dir}seafile-server-${git_ver}"/ || { /bin/echo "${red}chown the new server sea_dir failed${end}"; exit 1; }
         ### stop all services from seafile before update started
         /bin/systemctl stop seafile.service seahub.service || { /bin/echo "${red}stop the seafile and/or seahub service failed${end}"; exit 1; }
         ### compare versions if there is a major or minor version upgrade needed
@@ -121,7 +121,7 @@ else
                         IFS="${old_ifs}"
                         ### search for necessary update scripts
                         if [ "${script_major}" -gt "${serv_major}" ] || [ "${script_major}" -eq "${serv_major}" ] && [ "${script_minor}" -ge "${serv_minor}" ]; then
-	                	    /bin/su - "${sea_user}" -s /bin/bash -c "cd ${sea_dir}seafile-server-${git_ver}/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
+	                /bin/su - "${sea_user}" -s /bin/bash -c "cd ${sea_dir}seafile-server-${git_ver}/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
                         fi
                 done
         ### compare versions if there is a maint version upgrade needed
@@ -148,7 +148,7 @@ else
         fi
         if [ "${git_ver}" == "${verify_ver}" ]; then
                 ### move old seafile version to installed dir as an archive for a possible rollback scenario
-		            /bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
+		/bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
                 ### delete old temporary files and archives
                 /bin/rm -rf "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
         else
