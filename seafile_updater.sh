@@ -37,14 +37,19 @@ else
 fi
 
 ### get the latest release installed on the server ###
-serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-78)}')
+serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/")
+serv_ver=${serv_ver#*\"version\": \"}  # throw away beginning of string including `"version": "`
+serv_ver=${serv_ver%%\"*}              # throw away end of string starting with `"`
+
 if [ -z "${serv_ver}" ]; then
         echo "${red}error on validate server version!${end}"
         exit 1
 fi
 
 ### get the latest release available on GitHub ###
-git_ver=$(/usr/bin/curl -s "https://api.github.com/repos/haiwen/seafile-rpi/releases/latest" | /usr/bin/awk '/tag_name/{print substr($0, 17, length($0)-18)}')
+git_ver=$(/usr/bin/curl -s "https://api.github.com/repos/haiwen/seafile-rpi/releases/latest")
+git_ver=${git_ver#*\"tag_name\": \"v}  # throw away beginning of string including `"tag_name": "v`
+git_ver=${git_ver%%\"*}                # throw away end of string starting with `"`
 if [ -z "${git_ver}" ]; then
         echo "${red}error on validate available git version!${end}"
         exit 1
@@ -116,7 +121,7 @@ else
                         IFS="${old_ifs}"
                         ### search for necessary update scripts
                         if [ "${script_major}" -gt "${serv_major}" ] || [ "${script_major}" -eq "${serv_major}" ] && [ "${script_minor}" -ge "${serv_minor}" ]; then
-	                	/bin/su - "${sea_user}" -s /bin/bash -c "cd ${sea_dir}seafile-server-${git_ver}/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
+	                /bin/su - "${sea_user}" -s /bin/bash -c "cd ${sea_dir}seafile-server-${git_ver}/ && upgrade/${script}" || { /bin/echo "${red}update script failed!${end}"; exit 1; }
                         fi
                 done
         ### compare versions if there is a maint version upgrade needed
@@ -129,11 +134,13 @@ else
         ### verfiy if correct version of seafile server software is installed
         try=0
         until [ $try -ge 5 ]; do
-                verify_ver=$(/usr/bin/curl -s --connect-timeout 30 "${ssl_switch}://${domain}/api2/server-info/" | /usr/bin/awk '/version/{print substr($0, 14, length($0)-78)}')
+                verify_ver=$(/usr/bin/curl -s --connect-timeout 30 "${ssl_switch}://${domain}/api2/server-info/")
                 [ -n "${verify_ver}" ] && break
                 try=$((try+1))
                 sleep 10
         done
+        verify_ver=${verify_ver#*\"version\": \"}  # throw away beginning of string including `"version": "`
+        verify_ver=${verify_ver%%\"*}              # throw away end of string starting with first `"`
         ver_num='^[0-9].[0-9].[0-9]$'
         if ! [[ $verify_ver =~ $ver_num ]] ; then
                 echo "${red}error on validate server version!${end}"
