@@ -91,7 +91,7 @@ else
         done
 
         ### if seafile tar-file not already exists
-        if [ ! -f "${tmp_dir}seafile-server_${git_ver}_pi-${os_code}-stable.tar.gz" ]; then
+        if [ ! -f "${tmp_dir}seafile-server-${git_ver}-${os_code}-armv7.tar.gz" ]; then
                  ### get the latest version as tar.gz file from GitHub
                 /usr/bin/wget "https://github.com/haiwen/seafile-rpi/releases/download/v${git_ver}/seafile-server-${git_ver}-${os_code}-armv7.tar.gz" -P "${tmp_dir}" || { /bin/echo "${red}download latest server software package failed${end}"; exit 1; }
         else
@@ -155,7 +155,7 @@ else
         fi
         if [ "${git_ver}" == "${verify_ver}" ]; then
                 ### move old seafile version to installed dir as an archive for a possible rollback scenario
-		/bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
+                /bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
                 ### delete old temporary files and archives
                 /bin/rm -rf "${tmp_dir}seafile-server-${git_ver}-${os_code}-armv7.tar.gz" || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
         else
