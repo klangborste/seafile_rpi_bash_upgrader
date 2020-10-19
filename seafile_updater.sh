@@ -36,6 +36,10 @@ else
 	ssl_switch=http
 fi
 
+### get the installed os code from ubuntu ###
+os_code=$(/usr/bin/lsb_release -c)
+os_code=${os_code#*Codename:	}
+
 ### get the latest release installed on the server ###
 serv_ver=$(/usr/bin/curl -s "${ssl_switch}://${domain}/api2/server-info/")
 serv_ver=${serv_ver#*\"version\": \"}  # throw away beginning of string including `"version": "`
@@ -87,9 +91,9 @@ else
         done
 
         ### if seafile tar-file not already exists
-        if [ ! -f "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" ]; then
+        if [ ! -f "${tmp_dir}seafile-server_${git_ver}_pi-${os_code}-stable.tar.gz" ]; then
                  ### get the latest version as tar.gz file from GitHub
-                /usr/bin/wget "https://github.com/haiwen/seafile-rpi/releases/download/v${git_ver}/seafile-server_${git_ver}_stable_pi.tar.gz" -P "${tmp_dir}" || { /bin/echo "${red}download latest server software package failed${end}"; exit 1; }
+                /usr/bin/wget "https://github.com/haiwen/seafile-rpi/releases/download/v${git_ver}/seafile-server-${git_ver}-${os_code}-armv7.tar.gz" -P "${tmp_dir}" || { /bin/echo "${red}download latest server software package failed${end}"; exit 1; }
         else
                 /bin/echo "${red}seafile latest tar.gz already exists in tmp-dir${end}"
                 exit 1
@@ -97,7 +101,7 @@ else
         ### if seafile directory not already exists
         if [ ! -d "${sea_dir}seafile-server-${git_ver}/" ]; then
                 ### untar the archive
-                /bin/tar xzf "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" -C "${tmp_dir}" || { /bin/echo "${red}untar server package failed${end}"; exit 1; }
+                /bin/tar xzf "${tmp_dir}seafile-server-${git_ver}-${os_code}-armv7.tar.gz" -C "${tmp_dir}" || { /bin/echo "${red}untar server package failed${end}"; exit 1; }
                 ### move file to seafile working directory
                 /bin/mv "${tmp_dir}seafile-server-${git_ver}/" "${sea_dir}" || { /bin/echo "${red}move new untar-ed server software package to sea_dir failed${end}"; exit 1; }
         else
@@ -131,6 +135,9 @@ else
         fi
         ### seafile services start again
         /bin/systemctl start seafile.service seahub.service || { /bin/echo "${red}start the seafile and/or seahub service failed${end}"; exit 1; }
+	## let the service warm up a while
+	sleep 15
+	/bin/echo "${grn}service warming up for 15 seconds${end}"
         ### verfiy if correct version of seafile server software is installed
         try=0
         until [ $try -ge 5 ]; do
@@ -150,7 +157,7 @@ else
                 ### move old seafile version to installed dir as an archive for a possible rollback scenario
 		/bin/mv "${sea_dir}seafile-server-${serv_ver}" "${sea_dir}installed/" || { /bin/echo "${red}move to archive dir failed${end}"; exit 1; }
                 ### delete old temporary files and archives
-                /bin/rm -rf "${tmp_dir}seafile-server_${git_ver}_stable_pi.tar.gz" || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
+                /bin/rm -rf "${tmp_dir}seafile-server-${git_ver}-${os_code}-armv7.tar.gz" || { /bin/echo "${red}remove temporary files and directories failed${end}"; exit 1; }
         else
                 echo "${red}a bigger problem is occured, no new version was installed!${end}"
         fi
